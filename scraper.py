@@ -125,7 +125,7 @@ def get_items(url, category):
                         image_name = product_name + ' ' + image_name.replace('%2B', ' ')
 
                         # Filepath to save the images to
-                        path = './product_images/' + product_name + '/'
+                        path = './product_images/' + category + '/' + product_name + '/'
 
                         # Create a new folder with the product name
                         try:
