@@ -12,7 +12,7 @@ HEADLESS = False
 total_items = 0
 
 def csv_writer(filename):
-    HEADER = ['product_name', 'image_count', 'product_text']
+    HEADER = ['product_name', 'category', 'image_count', 'product_text']
     targetfile = open(filename, mode='w', encoding='utf-8', newline='\n')
     writer = csv.writer(targetfile, quoting=csv.QUOTE_MINIMAL)
 
@@ -27,8 +27,14 @@ def start_browser(headless):
     if (HEADLESS):
         option.add_argument("--headless")
 
-    #Do not load images to save time and bandwidth
-    prefs = {"profile.managed_default_content_settings.images": 2}
+    #Do not load images or use javascript to save time and bandwidth
+    prefs = {
+                "profile.managed_default_content_settings.images": 2,
+                # "webkit.webprefs.javascript_enabled": false,
+                "profile.content_settings.exceptions.javascript.*.setting": 2,
+                "profile.default_content_setting_values.javascript": 2,
+                "profile.managed_default_content_settings.javascript": 2
+            }
     option.add_experimental_option("prefs", prefs)
 
     # Do not allow notifications
@@ -63,7 +69,7 @@ def get_items(url, category, writer):
     prev_url = ''
 
     browser.get(url)
-    print ('Getting products in the', category, 'category\n')
+    print('Getting products in the', category, 'category')
 
     # Grab the HTML through BeautifulSoup
     category_page = BeautifulSoup(browser.page_source, 'html.parser')
@@ -123,6 +129,9 @@ def get_items(url, category, writer):
 
                     # Add the attribute to the dictionary
                     product['product_name'] = product_name
+
+                    # Capitalise the category words
+                    product['category'] = category.title()
 
                     # Attempt to get the other attributes
                     try:
@@ -194,7 +203,7 @@ def get_items(url, category, writer):
                                 pass
 
                         # Remove the new line \n\n spacing from the last line of the text
-                        product_text = product_text[:-4]
+                        product_text = product_text[:-2]
                         product['product_text'] = product_text
 
                     except Exception as e:
@@ -202,7 +211,6 @@ def get_items(url, category, writer):
                         line = trace_back.tb_lineno
                         print("Process Exception in line {}".format(line), e)
                         continue
-
                     writer.writerow(product.values())
 
                 except Exception as e:
@@ -248,14 +256,17 @@ def download_products(browser):
 
         # Split the URL by each '/' and get the last string from the 
         # string array, this will be the category page indicator as seen above.
-        # Also remove - dashes and replace with spaces
-        category = url.split('/')[-1].replace('-', ' ')
+        # Also remove - dashes and replace with spaces and capitalise each word
+        category = url.split('/')[-1].replace('-', '/').title()
+
+        # Replace the and in the Plants and Soil category with a lowercase one
+        category = category.replace('/And/', 'and')
 
         item_counter = get_items(url, category, writer)
 
         stop = timeit.default_timer()
         total_time = stop - start
-        print (item_counter, category, "stored successfully in", total_time, 'seconds')
+        print (item_counter, category, "stored successfully in", total_time, 'seconds\n')
 
 if __name__ == '__main__':
     start = timeit.default_timer()     
