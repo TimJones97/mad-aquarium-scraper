@@ -257,10 +257,10 @@ def download_products(browser):
         # Split the URL by each '/' and get the last string from the 
         # string array, this will be the category page indicator as seen above.
         # Also remove - dashes and replace with spaces and capitalise each word
-        category = url.split('/')[-1].replace('-', '/').title()
+        category = url.split('/')[-1].replace('-', ',').title()
 
         # Replace the and in the Plants and Soil category with a lowercase one
-        category = category.replace('/And/', 'and')
+        category = category.replace(',And,', 'and')
 
         item_counter = get_items(url, category, writer)
 
