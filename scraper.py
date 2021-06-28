@@ -164,13 +164,14 @@ def get_items(url, category, writer):
 
                         product['image_count'] = image_count
 
-                        # Get all of the text elements
+                        # Get all of the text elements -> structure <div class="dmNewParagraph"><div></div>
                         text_divs = item.find_all('div', class_='dmNewParagraph')
 
+                        # Find all nested divs
                         for nested_div in text_divs:
                             nested_div.find_all('div')
 
-                            # Attempt to get all text divs
+                            # Attempt to get all the text from each div
                             try:
                                 for div in nested_div:
                                     text_temp = div.get_text()
@@ -187,7 +188,7 @@ def get_items(url, category, writer):
                                             product_text += text_temp + '\n'
                                         else:
                                             product_text += text_temp + '\n\n'
-                                            
+
                             # If none exist, continue execution
                             except Exception as e:
                                 pass
